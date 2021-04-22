@@ -1,0 +1,89 @@
+#
+# This is the user-interface definition of the 
+# Salary prediction Shiny web application.
+#
+#
+#
+
+
+library(shiny)
+library(shinythemes)
+library(leaflet)
+
+# Define UI for application that draws a histogram
+shinyUI(fluidPage(
+    # shinythemes::themeSelector(),
+    theme = shinytheme("slate"),
+    
+    # Application title
+    titlePanel("STEM Professional Salary Predictor"),
+
+    # Sidebar with a slider input for gender
+    sidebarLayout(
+        sidebarPanel(
+            selectInput(
+                inputId = 'gender',
+                label = "Enter gender:",
+                levels(highered$GENDER)
+                ),
+            numericInput(
+                inputId = 'age',
+                label = 'Enter Age:',
+                30,
+                min = 1
+            ),
+            numericInput(
+                inputId = 'children',
+                label = 'No. of Children:',
+                1,
+                min = 0
+            ),
+            selectInput(
+                inputId = 'degree',
+                label = 'Type of degree:',
+                levels(highered$DGRDG)
+            ),
+            selectInput(
+                inputId = 'retired',
+                label = "Previously retired?",
+                levels(highered$FTPRET)
+            ),
+            selectInput(
+                inputId = 'job_code',
+                label = "Type of professional:",
+                levels(highered$NOCPRMG)
+            ),
+            actionButton(
+                inputId = "",
+                label = "Predict",
+                icon = icon("refresh"))
+        ),
+        
+        # Show a table of the user inputs
+    mainPanel(
+        tabsetPanel(
+            tabPanel(
+                tags$h4("User Inputs:"),
+                icon = icon("table"),
+                title = "Prediction:",
+                tableOutput('table'),
+                tags$h4("Predicted Salary Range is: ", icon("dollar")),
+                tags$br(),
+                tags$br(),
+                tags$br(),
+                tags$br(),
+                tags$h4("Predicted Salary adjusted for cost of living by state"),
+                leafletOutput("usmap"),
+                p()
+            ),
+            tabPanel(
+                icon = icon("book"),
+                title = "About",
+                tags$div()
+            )
+            
+        )
+       
+    )
+))
+)
