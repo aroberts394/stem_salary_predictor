@@ -28,14 +28,23 @@ shinyServer(function(input, output) {
     })
     
     output$usmap <- renderLeaflet({
-        pal <- colorQuantile("YlOrRd", domain = states_sf$cost_index)
+        pal <- colorQuantile("YlOrRd", domain = states_merge$cost_index)
         
-        m <- leaflet(states_sf) %>%
-            setView(-96, 37.8, 4) %>%
-            addTiles()
+        m <- 
+            # leaflet(states_sf) %>%
+            leaflet() %>%
+            addProviderTiles("CartoDB.Positron") %>%
+            setView(-96, 37.8, 4)
+            # addTiles()
         
-        m <- m %>% addPolygons(
-            fillColor = ~pal(cost_index),
+        labels <- sprintf(
+            "<strong>%s</strong><br/> COLI index: %g", states_merge$NAME, states_merge$cost_index) %>% 
+            lapply(htmltools::HTML)
+        
+        m <- m %>% 
+            addPolygons(
+            data = states_merge,
+            fillColor = ~pal(states_merge$cost_index),
             weight = 2,
             opacity = 1,
             color = "white",
@@ -43,10 +52,15 @@ shinyServer(function(input, output) {
             fillOpacity = 0.7,
             highlight = highlightOptions(
                 weight = 5,
-                color = "#666",
+                color = "#667",
                 dashArray = "",
                 fillOpacity = 0.7,
-                bringToFront = TRUE)
+                bringToFront = TRUE),
+            label = labels,
+            labelOptions = labelOptions(
+                style = list("font-weight" = "normal", padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto")
         )
         
         m

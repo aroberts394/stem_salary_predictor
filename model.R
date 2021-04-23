@@ -9,6 +9,7 @@ source("global.R")
 #load required libraries
 # library(caret)
 library(corrplot)
+# library(lares)
 library(ggplot2)
 library(rsample)
 library(recipes)
@@ -33,36 +34,55 @@ library(forcats)
 
 # plotting correlation plot
 #correlations of all numeric variables
-numericVars <- which(sapply(highered, is.numeric)) #index vector of numeric variables
-all_numVar <- highered[, numericVars]
-(cor_numVar <- cor(all_numVar, method = "pearson", use = "complete.obs"))
+# numericVars <- which(sapply(highered, is.numeric)) #index vector of numeric variables
+# all_numVars <- highered[, numericVars]
+# (cor_numVars <- cor(all_numVars, method = "pearson", use = "complete.obs"))
 
-#correlation plot
-corrplot(cor_numVar, type = "upper", order = "hclust",
-         method = "color",
-         tl.col = "black", tl.srt = 45,
-         addCoef.col = "black", 
-         insig = "blank")
+#correlation plot of numeric variables
+# corrplot(cor_numVar, type = "upper", order = "hclust",
+#          method = "color",
+#          tl.col = "black", tl.srt = 45,
+#          addCoef.col = "black", 
+#          insig = "blank")
 
 # remove highly correlated field, also REFID field
 highered <- highered %>% select(-MR03Y5, -REFID)
 
+# check correlation between categorical variables
+# categoricalVars <- names(which(sapply(highered, is.factor))) # derive categorical variables
+# all_catVars <- as.data.frame(lapply(highered[categoricalVars], as.character))
 
-# check distribution of salary outcome
-ggplot(highered, aes(x = ADJ_SALARY)) + 
-  geom_vline(xintercept = median(highered$ADJ_SALARY), color = "green") +
-  geom_vline(xintercept = mean(highered$ADJ_SALARY), color = "blue") +
-  geom_histogram(bins = 70)
+# devtools::install_github("laresbernardo/lares") # install package for calculating and plotting correlations
+# library(lares)
 
-# check impact of log scale outcome variable
-ggplot(highered, aes(x = ADJ_SALARY)) + 
-  geom_histogram(bins = 50) +
-  geom_vline(xintercept = median(highered$ADJ_SALARY), color = "green") +
-  geom_vline(xintercept = mean(highered$ADJ_SALARY), color = "blue") +
-  scale_x_log10()
+# calculate and plot correlations
+# corr_cross(all_catVars, # name of dataset
+#            max_pvalue = 0.05, # display only significant correlations (at 5% level)
+#            # top = 10 # display top 10 couples of variables (by correlation coefficient)
+#            )
+
+# further removing highly correlated fields from analysis
+highered <- highered %>% select(-NMRMEMG, -MRDGRUS, -MRDG, -BTHUS, -CTZUS, -NDGMEMG)
+
+# remove extra df from memory
+# rm(all_catVars)
+# 
+# 
+# # check distribution of salary outcome
+# ggplot(highered, aes(x = ADJ_SALARY)) + 
+#   geom_vline(xintercept = median(highered$ADJ_SALARY), color = "green") +
+#   geom_vline(xintercept = mean(highered$ADJ_SALARY), color = "blue") +
+#   geom_histogram(bins = 70)
+# 
+# # check impact of log scale outcome variable
+# ggplot(highered, aes(x = ADJ_SALARY)) + 
+#   geom_histogram(bins = 50) +
+#   geom_vline(xintercept = median(highered$ADJ_SALARY), color = "green") +
+#   geom_vline(xintercept = mean(highered$ADJ_SALARY), color = "blue") +
+#   scale_x_log10()
 
 
-#### PREDICTIVE MODELING -----------------------------------------------------
+#### PREDICTIVE MODELING ------------------------------------------------------------
 
 # splitting data
 # Save the split information for an 80/20 split of the data, stratifying by salary
@@ -86,7 +106,7 @@ pen_lm_recipe <- recipe(ADJ_SALARY ~., data = highered_train) %>%
   step_zv(all_predictors())
 
   
-#### MODEL SPECIFICATIONS ------------------------------------
+#### MODEL SPECIFICATIONS --------------------------------------------------------------
 
 # KNN model
 nearest_neighbor_kknn_spec <-
@@ -109,7 +129,7 @@ rand_forest_ranger_spec <-
   
 
 
-#### LINEAR REGRESSION WORKFLOW  --------------------------------------------
+#### LINEAR REGRESSION WORKFLOW  -------------------------------------------------
 # specify the linear regression model
 lm_model <- linear_reg() %>%
   set_engine("lm") %>%

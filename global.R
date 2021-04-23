@@ -6,21 +6,21 @@
 
 
 # load required packages
-library(readr)
+library(vroom)
 library(dplyr)
 library(tidyr)
 library(tigris)
+library(leaflet)
 
 
 # loading the higher eduaction data set
-highered_raw <- read_csv("data/highered.csv")
+highered_raw <- vroom("data/highered.csv", col_select = (-WTSURVY))
 highered <- highered_raw
 
-# remove fields that do not add any meaningful info
-# remove BIRYR variable cause of correlation with age, 
+# remove fields that do not add any meaningful info, remove BIRYR variable cause of correlation with age, 
 # remove NOCPR because same as NOCPRMG but lower level
 highered <- highered %>% 
-  select(-YEAR,-PERSONID, -WEIGHT, -WTSURVY, -BIRYR,-SURID, -SAMPLE, -NOCPR)
+  select(-YEAR,-PERSONID, -WEIGHT, -BIRYR,-SURID, -SAMPLE, -NOCPR)
 
 # check referential integrity of REFID
 length(unique(highered$REFID))
@@ -63,7 +63,9 @@ cols_to_factor <- c("GENDER", "RACETH", "DGRDG", "OCEDRLP", "MRDGRUS",
                     "HRSWKGR", "FTPRET", "EMSEC", "EMSIZE", "NEWBUS", "EMUS",
                     "GOVSUP", "NRREA", "JOBSATIS")
 
-highered[cols_to_factor] <- lapply(highered[cols_to_factor], factor) 
+# highered[cols_to_factor] <- lapply(highered[cols_to_factor], factor)
+highered <- highered %>% mutate(across(all_of(cols_to_factor), as.factor))
+
 
 # create a variable to show years since graduated
 highered <- highered %>%
@@ -74,8 +76,7 @@ highered$GENDER <- with(highered, plyr::revalue(GENDER, c("1" = "Female", "2" = 
 
 highered$RACETH <- with(highered, plyr::revalue(RACETH, c("1" = "Asian", 
                                                           "2" = "White", 
-                                                          "3" = "Under-represented Minorities", 
-                                                          "4"  = "Other")))
+                                                          "3" = "Under-represented Minorities")))
 
 highered$DGRDG <-  with(highered, plyr::revalue(DGRDG, c("1" = "Bachelors", 
                                                          "2" = "Masters", 
@@ -95,8 +96,7 @@ highered$NOCPRMG <- with(highered, plyr::revalue(NOCPRMG, c("1" = "Computer Scie
                                                             "7" = "Non-Science or Engineering occupation")))
 
 highered$BTHUS <- with(highered, plyr::revalue(BTHUS, c("0" = "Not in the US",
-                                                         "1"   = "United States",
-                                                         "99"   = "Missing")))
+                                                         "1"   = "United States")))
 
 highered$CTZUSIN <- with(highered, plyr::revalue(CTZUSIN, c("0"  = "No",
                                                             "1"  = "Yes")))
@@ -104,13 +104,11 @@ highered$CTZUSIN <- with(highered, plyr::revalue(CTZUSIN, c("0"  = "No",
 highered$CTZUS <- with(highered, plyr::revalue(CTZUS, c("1" = "Born in US or US territories",
                                                             "2" = "Born abroad of American parents",
                                                             "3" = "By naturalization",
-                                                            "98" = "Logical Skip")))
+                                                            "98" = "Not a Citizen")))
 
-highered$CHTOT <- with(highered, plyr::revalue(CHTOT, c("0"  = "No children",
-                                                        "1"  = "One child",
-                                                        "2"  = "One to three children",
+# "0"  = "No children", "2"  = "One to three children", "4"  = "More than three children" removed
+highered$CHTOT <- with(highered, plyr::revalue(CHTOT, c("1"  = "One child",
                                                         "3"  = "Two or more children",
-                                                        "4"  = "More than three children",
                                                         "98"  = "No children")))
 
 highered$NDGMEMG <- with(highered, plyr::revalue(NDGMEMG, c("1" = "Computer and mathematical sciences",
@@ -132,38 +130,38 @@ highered$MRDG <- with(highered, plyr::revalue(MRDG, c("1" = "Bachelors",
                                                         "4" = "Professional",
                                                        "5" = "Other")))
 
+# "9" = "Other Categories" removed
 highered$NMRMEMG <- with(highered, plyr::revalue(NMRMEMG, c("1" = "Computer and mathematical sciences",
                                                             "2" = "Biological, agricultural and environmental life sciences",
                                                             "3" = "Physical and related sciences",
                                                             "4" = "Social and related sciences",
                                                             "5" = "Engineering",
                                                             "6" = "Science and engineering-related fields",
-                                                            "7" = "Non-science and engineering fields",
-                                                            "9" = "Other Categories")))
+                                                            "7" = "Non-science and engineering fields")))
 
 highered$MRDGRUS <- with(highered, plyr::revalue(MRDGRUS, c("0" = "Non-US",
                                                             "1" = "US")))
 
+# "97" = "Survey Exclusion/Confidentiality" removed
 highered$ACFPT <- with(highered, plyr::revalue(ACFPT, c("1" =" Part-time Student",
                                                         "2" = "Full-time Student",
                                                         "3" =" Not enrolled in a degree program, but taking courses",
-                                                        "97" = "Survey Exclusion/Confidentiality",
                                                         "98" = "Logical Skip")))
 
+# "98" = "Logical Skip" removed
 highered$HRSWKGR <- with(highered, plyr::revalue(HRSWKGR, c("1" = "20 or less",
                                                             "2" = "21-35",
                                                             "3" = "36-40",
-                                                            "4" = "Greater than 40",
-                                                            "98" = "Logical Skip")))
+                                                            "4" = "Greater than 40")))
 
 highered$FTPRET <- with(highered, plyr::revalue(FTPRET, c("0"  = "No",
                                                             "1"  = "Yes")))
 
+# "5" = "Non-US government" removed
 highered$EMSEC <- with(highered, plyr::revalue(EMSEC, c("1" = "2 year college or other school system",
                                                         "2" = "4 year college or medical institution",
                                                         "3" = "Government",
-                                                        "4" = "Business or industry",
-                                                        "5" = "Non-US government")))
+                                                        "4" = "Business or industry")))
 
 highered$EMSIZE <- with(highered, plyr::revalue(EMSIZE, c("1" = "10 or fewer employees",
                                                           "2" = "11-24 employees",
@@ -206,20 +204,31 @@ highered$JOBSATIS <- with(highered, plyr::revalue(JOBSATIS, c("1" = "Very satisf
 
 # salary is based from 2013, adjust salary for 2020 purchasing power
 # load Consumer Price Index data from U.S Bureau of Labor Statistics
-cpi_data <- read_csv("data/cpi_2013_to_2021.csv")
+cpi_data <- vroom("data/cpi_2013_to_2021.csv")
 
 # load cost of living index data set
-coli_index <- read_csv("data/advisorsmith_cost_of_living_index.csv") %>%
-  rename(cost_index = `Cost of Living Index`)
+coli_index <- vroom("data/advisorsmith_cost_of_living_index.csv", 
+                    col_select = list(cost_index = `Cost of Living Index`, everything()))
 
+# get state level cost of living index
+state_coli_index <- coli_index %>%
+  group_by(State) %>%
+  summarise(cost_index = mean(cost_index)) %>%
+  ungroup()
 
 # rename cost of living index column
 # incorporate coordinates into coli data
-states_sf <- tigris::states() %>%
-  as("sf") %>%
-  rename(State = STUSPS) %>% # renaming abbreviated state name in tigris df
-  left_join(coli_index) %>%
-  na.omit()
+# states_sf <- tigris::states() %>%
+#   as("sf") %>%
+#   rename(State = STUSPS) %>% # renaming abbreviated state name in tigris df
+#   left_join(coli_index) %>%
+#   na.omit()
+
+# Downloading the shapefiles for states at the lowest resolution
+states <- states(cb=T)
+
+# Now we use the Tigris function geo_join to bring together
+states_merge <- geo_join(states, state_coli_index, "STUSPS", "State")
 
 # get cpi index difference of 2013 and 2020
 cpi_index = as.numeric(cpi_data[9, "Mar"]/cpi_data[1,"Annual"])
