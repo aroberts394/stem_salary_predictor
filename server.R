@@ -1,6 +1,9 @@
-#
-# This is the server logic of a Shiny web application. 
-#
+# ======================= #
+# Author: Tony Roberts
+# Course: PUBH 7462
+# Project: STEM Professional Salary Predictor
+# Description: Shiny app server function for STEM salary predictor
+# ======================= #
 
 library(shiny)
 library(leaflet)

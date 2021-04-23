@@ -1,9 +1,9 @@
-#
-# This is the user-interface definition of the 
-# Salary prediction Shiny web application.
-#
-#
-#
+# ======================= #
+# Author: Tony Roberts
+# Course: PUBH 7462
+# Project: STEM Professional Salary Predictor
+# Description: Shiny app ui function for STEM salary predictor
+# ======================= #
 
 library(shiny)
 library(shinythemes)

@@ -5,9 +5,9 @@ account: tony394
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4017775
-bundleId: 4508125
+bundleId: 4508159
 url: https://tony394.shinyapps.io/stem_salary_predictor/
-when: 1619153476.41231
-lastSyncTime: 1619153476.41232
+when: 1619154337.38646
+lastSyncTime: 1619154337.38647
 asMultiple: FALSE
 asStatic: FALSE

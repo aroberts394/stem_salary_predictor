@@ -69,8 +69,20 @@ highered <- highered %>% mutate(across(all_of(cols_to_factor), as.factor))
 
 # create a variable to show years since graduated
 highered <- highered %>%
-  mutate(YEARS_SINCE_GRAD = 2013 - MR03Y5)
-
+  mutate(YEARS_SINCE_GRAD = 2013 - MR03Y5,
+         YEARS_SINCE_GRAD = case_when(YEARS_SINCE_GRAD == 2 ~ "2 years or less",
+                                      YEARS_SINCE_GRAD == 7 ~ "3 to 7 years",
+                                      YEARS_SINCE_GRAD == 12 ~ "8 to 12 years",
+                                      YEARS_SINCE_GRAD == 17 ~ "13 to 17 years",
+                                      YEARS_SINCE_GRAD == 22 ~ "18 to 22 years",
+                                      YEARS_SINCE_GRAD == 27 ~ "23 to 27 years",
+                                      YEARS_SINCE_GRAD == 32 ~ "28 to 32 years",
+                                      YEARS_SINCE_GRAD == 37 ~ "33 to 37 years",
+                                      YEARS_SINCE_GRAD == 42 ~ "38 to 42 years",
+                                      YEARS_SINCE_GRAD == 47 ~ "43 to 47 years",
+                                      YEARS_SINCE_GRAD == 52 ~ "48 to 52 years"),
+         YEARS_SINCE_GRAD = factor(YEARS_SINCE_GRAD))
+  
 # rename factor levels to make them understandable
 highered$GENDER <- with(highered, plyr::revalue(GENDER, c("1" = "Female", "2" = "Male")))
 
@@ -146,7 +158,7 @@ highered$MRDGRUS <- with(highered, plyr::revalue(MRDGRUS, c("0" = "Non-US",
 highered$ACFPT <- with(highered, plyr::revalue(ACFPT, c("1" =" Part-time Student",
                                                         "2" = "Full-time Student",
                                                         "3" =" Not enrolled in a degree program, but taking courses",
-                                                        "98" = "Logical Skip")))
+                                                        "98" = "Not a student")))
 
 # "98" = "Logical Skip" removed
 highered$HRSWKGR <- with(highered, plyr::revalue(HRSWKGR, c("1" = "20 or less",
@@ -181,7 +193,7 @@ highered$EMUS <- with(highered, plyr::revalue(EMUS, c("0" = "Non-US",
 
 highered$GOVSUP <- with(highered, plyr::revalue(GOVSUP, c("0"  = "No",
                                                           "1"  = "Yes",
-                                                          "98" = "Logical skip")))
+                                                          "98" = "No")))
 
 highered$NRREA <- with(highered, plyr::revalue(NRREA, c("1" = "Pay, promotion opportunities",
                                                         "2" = "Working conditions",
@@ -190,7 +202,7 @@ highered$NRREA <- with(highered, plyr::revalue(NRREA, c("1" = "Pay, promotion op
                                                         "5" = "Family-related reasons",
                                                         "6" = "Job in highest degree field not available",
                                                         "7" = " Other reason for not working",
-                                                        "98"  =  "Logical Skip")))
+                                                        "98"  =  "Not working outside of field")))
 
 highered$JOBSATIS <- with(highered, plyr::revalue(JOBSATIS, c("1" = "Very satisfied",
                                                               "2" = "Somewhat satisfied",
