@@ -288,3 +288,19 @@ lm_simple_wflow <- workflow() %>%
 # simplified linear regression model
 lm_simple_fit <- fit(lm_simple_wflow, data = highered_simple)
 
+
+# test predictions
+# test_df <- data.frame(AGE = 33,
+#                       GENDER = "Female",
+#                       RACETH = "White",
+#                       CHTOT = "No children",
+#                       HRSWKGR = "36-40",
+#                       EMSIZE = "100-499 employees",
+#                       EMSEC = "Business or industry",
+#                       OCEDRLP = "Somewhat related",
+#                       NOCPRMG = "Other Scientists",
+#                       YEARS_SINCE_GRAD = "3 to 7 years")
+# test_pred <- round(as.numeric(predict(lm_simple_fit, new_data = test_df, type = "conf_int")),2)
+# 
+# paste('Based on your inputs, the predicted salary is: $', test_pred[1],' - $',test_pred[2], sep = '')
+

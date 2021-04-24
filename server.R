@@ -29,23 +29,54 @@ shinyServer(function(input, output) {
                                         WorkRelated, Profession, Years)
         input_table <- as.data.frame(input_table)
        
-    })
+    }) # end user input table
+    
     # render table based on user inputs
-    output$table <- renderTable({
+    output$inputs <- renderTable({
        user_inputs()
-    })
+    }) # end render table
+    
+    # create a dataframe of inputs for prediction
+    data <- reactive({
+        data.frame(AGE = input$age,
+                   GENDER = input$gender,
+                   RACETH = input$race,
+                   CHTOT = input$children,
+                   HRSWKGR = input$workhours,
+                   EMSIZE = input$empsize,
+                   EMSEC = input$empsec,
+                   OCEDRLP = input$work_related,
+                   NOCPRMG = input$profession,
+                   YEARS_SINCE_GRAD = input$years
+                   )
+    }) #  end create  data frame
+    
+    # make predictions
+    pred1 <- eventReactive(input$predict, {
+        p <- round(as.numeric(predict(lm_simple_fit, new_data = data(), type = "conf_int")), 2)
+        p[1]
+    }) # end predictions
+    
+    # make predictions
+    pred2 <- eventReactive(input$predict, {
+        p <- round(as.numeric(predict(lm_simple_fit, new_data = data(), type = "conf_int")), 2)
+        p[2]
+    }) # end predictions
+    
+    # render predicted salary text
+    output$salary <- renderText(
+        paste('Based on your inputs, the predicted salary range is: $', pred1(),' - $', pred2(), sep = '')
+        ) # end render predicted salary text
 
     # render leaflet map
     output$usmap <- renderLeaflet({
         pal <- colorQuantile("YlOrRd", domain = states_merge$cost_index)
         
         m <- 
-            # leaflet(states_sf) %>%
             leaflet() %>%
             addProviderTiles("CartoDB.Positron") %>%
             setView(-96, 37.8, 4)
-            # addTiles()
-        
+
         labels <- sprintf(
             "<strong>%s</strong><br/> COLI index: %g", states_merge$NAME, states_merge$cost_index) %>% 
             lapply(htmltools::HTML)
@@ -71,8 +102,26 @@ shinyServer(function(input, output) {
                 textsize = "15px",
                 direction = "auto")
         )
-        
         m
-    })
+    }) # end leaflet map plot
     
-})
+    # render highered raw data table
+    output$table <- DT::renderDT({
+        highered_simple %>%
+            DT::datatable(options = list(
+                scrollX = TRUE,
+                paginate = T
+            ))
+    }) # close renderDT
+    
+    # allow download of data
+    output$downloadData <- downloadHandler(
+        filename = function() {
+            paste("higherED-", Sys.Date(), ".csv", sep = "")
+        },
+        content = function(file) {
+            write.csv(highered_simple, file)
+        }
+    ) # close downloadHandler
+    
+}) # close shinyServer
