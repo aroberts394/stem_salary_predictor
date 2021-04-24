@@ -20,37 +20,56 @@ shinyUI(fluidPage(
     # Sidebar with a slider input for gender
     sidebarLayout(
         sidebarPanel(
-            selectInput(
-                inputId = 'gender',
-                label = "Enter gender:",
-                levels(highered$GENDER)
-                ),
             numericInput(
                 inputId = 'age',
                 label = 'Enter Age:',
                 30,
                 min = 1
             ),
-            numericInput(
+            selectInput(
+                inputId = 'gender',
+                label = "Enter gender:",
+                levels(highered_simple$GENDER)
+                ),
+            selectInput(
+                inputId = 'race',
+                label = "Enter race/ethnicity:",
+                levels(highered_simple$RACETH)
+            ),
+            selectInput(
                 inputId = 'children',
-                label = 'No. of Children:',
-                1,
-                min = 0
+                label = "Enter number of children:",
+                levels(highered_simple$CHTOT)
             ),
             selectInput(
-                inputId = 'degree',
-                label = 'Type of degree:',
-                levels(highered$DGRDG)
+                inputId = 'workhours',
+                label = 'Hours worked per week:',
+                levels(highered_simple$HRSWKGR)
             ),
             selectInput(
-                inputId = 'retired',
-                label = "Previously retired?",
-                levels(highered$FTPRET)
+                inputId = 'empsize',
+                label = 'Employer size:',
+                levels(highered_simple$EMSIZE)
             ),
             selectInput(
-                inputId = 'job_code',
+                inputId = 'empsec',
+                label = 'Employer sector',
+                levels(highered_simple$EMSEC)
+            ),
+            selectInput(
+                inputId = 'work_related',
+                label = 'How related to your degree:',
+                levels(highered_simple$OCEDRLP)
+            ),
+            selectInput(
+                inputId = 'profession',
                 label = "Type of professional:",
-                levels(highered$NOCPRMG)
+                levels(highered_simple$NOCPRMG)
+            ),
+            selectInput(
+                inputId = 'years',
+                label = "Years since graduation:",
+                levels(highered_simple$YEARS_SINCE_GRAD)
             ),
             actionButton(
                 inputId = "",
@@ -58,7 +77,6 @@ shinyUI(fluidPage(
                 icon = icon("refresh"))
         ),
         
-        # Show a table of the user inputs
     mainPanel(
         tabsetPanel(
             tabPanel(

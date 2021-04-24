@@ -11,7 +11,11 @@ library(dplyr)
 library(tidyr)
 library(tigris)
 library(leaflet)
-
+library(rsample)
+library(recipes)
+library(parsnip)
+library(workflows)
+library(yardstick)
 
 # loading the higher eduaction data set
 highered_raw <- vroom("data/highered.csv", col_select = (-WTSURVY))
@@ -254,3 +258,33 @@ highered <- highered %>% select(-SALARY)
 
 # remove raw file from memory
 rm(highered_raw)
+
+
+### SIMPLIFIED LINEAR REGRESSION ------------------------------------------------
+highered_simple <- highered %>% select(AGE, GENDER, RACETH, CHTOT, HRSWKGR, EMSIZE, EMSEC, OCEDRLP,
+                                      NOCPRMG, YEARS_SINCE_GRAD, ADJ_SALARY)
+
+# split into train/test
+set.seed(123)
+highered_simple_split <- initial_split(highered_simple, prop = 0.75, strata = ADJ_SALARY)
+highered_simple_train <- training(highered_simple_split)
+highered_simple_test <- testing(highered_simple_split)
+
+# create recipe
+lm_simple_recipe <- recipe(ADJ_SALARY ~., data = highered_simple) %>%
+  step_dummy(all_nominal()) %>%
+  step_zv(all_predictors())
+
+# specify the linear regression model
+lm_model <- linear_reg() %>%
+  set_engine("lm") %>%
+  set_mode("regression")
+
+# create workflow
+lm_simple_wflow <- workflow() %>%
+  add_model(lm_model) %>%
+  add_recipe(lm_simple_recipe)
+
+# simplified linear regression model
+lm_simple_fit <- fit(lm_simple_wflow, data = highered_simple)
+

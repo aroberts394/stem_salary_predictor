@@ -79,7 +79,7 @@ highered <- highered %>% select(-NMRMEMG, -MRDGRUS, -MRDG, -BTHUS, -CTZUS, -NDGM
 
 
 # simplified highered data frame
-highered_simple <- highered %>% select(AGE, GENDER, RACETH, CHTOT, HRSWKGR, EMSIZE, EMSEC, 
+highered_simple <- highered %>% select(AGE, GENDER, RACETH, CHTOT, HRSWKGR, EMSIZE, EMSEC, OCEDRLP,
                                       NOCPRMG, YEARS_SINCE_GRAD, ADJ_SALARY)
 
 

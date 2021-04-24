@@ -8,28 +8,34 @@
 library(shiny)
 library(leaflet)
 
-# Define server logic required to draw a histogram
+# Define server logic 
 shinyServer(function(input, output) {
     
+    # get all user inputs
     user_inputs <- reactive({
-        # get user inputs
         Age <- as.integer(input$age)
         Gender <- as.character(input$gender)
-        Children <- as.integer(input$children)
-        Degree <- as.character(input$degree)
-        Retired <- as.character(input$retired)
-        Profession <- as.character(input$job_code)
+        Race <- as.character(input$race)
+        Children <- as.character(input$children)
+        Hours <- as.character(input$workhours)
+        EmpSize <- as.character(input$empsize)
+        EmpSector <- as.character(input$empsec)
+        WorkRelated <- as.character(input$work_related)
+        Profession <- as.character(input$profession)
+        Years <- as.character(input$years)
         
         # combine inputs into table
-        input_table <- cbind.data.frame(Age, Gender, Children, Degree, Retired, Profession)
+        input_table <- cbind.data.frame(Age, Gender, Race, Children, Hours, EmpSize, EmpSector, 
+                                        WorkRelated, Profession, Years)
         input_table <- as.data.frame(input_table)
        
     })
-
+    # render table based on user inputs
     output$table <- renderTable({
        user_inputs()
     })
-    
+
+    # render leaflet map
     output$usmap <- renderLeaflet({
         pal <- colorQuantile("YlOrRd", domain = states_merge$cost_index)
         
