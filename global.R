@@ -1,8 +1,9 @@
-#### salary prediction shiny app project ####
-
-### using IPUMS higher ed data to predict salary for STEM professionals ###
-### Using NSCG, SDR and ISDR surveys from SESTAT NSCG 2013, SESTAT SDR 2013,and SDR 2013 and  ISDR 2013 samples ###
-### load and transform data ###
+# ======================= #
+# Author: Tony Roberts
+# Course: PUBH 7462
+# Project: STEM Professional Salary Predictor
+# Description: Global file for STEM Salary shiny app
+# ======================= #
 
 
 # load required packages
@@ -16,6 +17,7 @@ library(recipes)
 library(parsnip)
 library(workflows)
 library(yardstick)
+library(ggplot2)
 
 # loading the higher eduaction data set
 highered_raw <- vroom("data/highered.csv", col_select = (-WTSURVY))
@@ -232,6 +234,12 @@ state_coli_index <- coli_index %>%
   summarise(cost_index = mean(cost_index)) %>%
   ungroup()
 
+# calculate overall mean cost of living index
+median_index <- median(state_coli_index$cost_index)
+
+# calculate overall median cost of living index
+mean_index <- mean(state_coli_index$cost_index) 
+
 # rename cost of living index column
 # incorporate coordinates into coli data
 # states_sf <- tigris::states() %>%
@@ -244,7 +252,8 @@ state_coli_index <- coli_index %>%
 states <- states(cb=T)
 
 # Now we use the Tigris function geo_join to bring together
-states_merge <- geo_join(states, state_coli_index, "STUSPS", "State")
+states_merge <- geo_join(states, state_coli_index, "STUSPS", "State") %>%
+  filter(!is.na(cost_index))
 
 # get cpi index difference of 2013 and 2020
 cpi_index = as.numeric(cpi_data[9, "Mar"]/cpi_data[1,"Annual"])
@@ -258,6 +267,7 @@ highered <- highered %>% select(-SALARY)
 
 # remove raw file from memory
 rm(highered_raw)
+
 
 
 ### SIMPLIFIED LINEAR REGRESSION ------------------------------------------------
@@ -303,4 +313,26 @@ lm_simple_fit <- fit(lm_simple_wflow, data = highered_simple)
 # test_pred <- round(as.numeric(predict(lm_simple_fit, new_data = test_df, type = "conf_int")),2)
 # 
 # paste('Based on your inputs, the predicted salary is: $', test_pred[1],' - $',test_pred[2], sep = '')
+
+# remove highered df from memory
+rm(highered)
+
+# Dataset to be explored
+raw_df <- highered_simple %>%
+  rename(Age = AGE,
+         Gender = GENDER,
+         Race = RACETH,
+         No_of_children = CHTOT,
+         Hours_working = HRSWKGR,
+         Employer_size = EMSIZE,
+         Employer_sector = EMSEC,
+         Degree_related_to_job = OCEDRLP,
+         Job_profession = NOCPRMG,
+         Years_since_grad = YEARS_SINCE_GRAD,
+         Adjusted_salary = ADJ_SALARY
+         )
+
+# Pre-compute some variables to be used by app
+not_numeric <- sapply(names(raw_df), function(x) !is.numeric(raw_df[[x]]))
+df <- raw_df
 

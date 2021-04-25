@@ -70,7 +70,8 @@ shinyServer(function(input, output) {
 
     # render leaflet map
     output$usmap <- renderLeaflet({
-        pal <- colorQuantile("YlOrRd", domain = states_merge$cost_index)
+        bins <- c(0, 30, 60, 80, 90, 100, 120, 140, 150, 160)
+        pal <- colorBin("YlOrRd", domain = states_merge$cost_index, bins = bins)
         
         m <- 
             leaflet() %>%
@@ -102,12 +103,127 @@ shinyServer(function(input, output) {
                 textsize = "15px",
                 direction = "auto")
         )
-        m
+        m %>% addLegend(pal = pal, values = -states_merge$cost_index, opacity = 0.7, title = NULL,
+                        position = "bottomright")
     }) # end leaflet map plot
+    
+    
+    # calculate overall mean cost of living index
+    output$meancoli <- renderText(
+        paste("The average cost of living index is: ", round(mean_index,2), sep = "")
+    )
+
+    # calculate overall median cost of living index
+    output$mediancoli <- renderText(
+        paste("The median cost of living index is: ", round(median_index, 2), sep = "")
+    )
+    
+    
+    # get new dataset sample for plotting
+    idx <- reactive({
+        if (input$sampleType == "first") {
+            1:input$sampleSize
+        } else {
+            set.seed(input$sampleSeed)
+            sample(nrow(raw_df), input$sampleSize)
+        }
+    })
+    df <- reactive(raw_df[idx(), , drop = FALSE])
+    
+    # Get head of selected data
+    output$snippet <- renderPrint({
+        head(df(), n = 15)
+    })
+    
+    # get plot type
+    # * 2: both numeric variables
+    # * 1: one numeric, one non-numeric variable
+    # * 0: both non-numeric variables
+    # * -1: only one variable provided
+    plot_type <- reactive({
+        if (input$y != "None")
+            is.numeric(raw_df[[input$x]]) + is.numeric(raw_df[[input$y]])
+        else
+            -1
+    })
+    
+    # Create EDA plot
+    output$plot <- renderPlot({
+        if (plot_type() == 2) {
+            # both numeric variables: scatterplot
+            # also allow for color, jitter & smoothing
+            p <- ggplot(df(), aes_string(x = input$x, y = input$y))
+            
+            if (input$jitter)
+                p <- p + geom_jitter(alpha = 0.5)
+            else
+                p <- p + geom_point(alpha = 0.5)
+            
+            if (input$smooth)
+                p <- p + geom_smooth()
+            
+            # color change
+            if (input$color != "None")
+                p <- p + aes_string(color = input$color)
+        } else if (plot_type() == 1) {
+            # one numeric var, one character var: boxplot
+            # allow color, don't allow jitter or smoothing
+            p <- p <- ggplot(df(), aes_string(x = input$x, y = input$y)) + 
+                geom_boxplot()
+            
+            # fill change
+            if (input$color != "None")
+                p <- p + aes_string(fill = input$color)
+        } else if (plot_type() == 0) {
+            # two character variables: heatmap
+            # don't allow color, jitter or smoothing
+            temp_df <- reactive(df()[, c(input$x, input$y), drop = FALSE] %>%
+                                    group_by(across()) %>%
+                                    summarize(count = n())
+            )
+            p <- ggplot(temp_df(), 
+                        mapping = aes_string(x = input$x, y = input$y, fill = "count")) +
+                geom_tile() +
+                scale_fill_gradient(low = "#e7e7fd", high = "#1111dd")
+        } else {
+            # only one variable: univariate plot
+            # allow color, don't allow jitter or smoothing
+            p <- ggplot(df(), aes_string(x = input$x))
+            
+            if (is.numeric(raw_df[[input$x]]))
+                p <- p + geom_histogram()
+            else
+                p <- p + geom_bar()
+            
+            # fill change
+            if (input$color != "None")
+                p <- p + aes_string(fill = input$color)
+        }
+        
+        # add title
+        if (plot_type() >= 0) {
+            p <- p + labs(title = paste(input$y, "vs.", input$x))
+        } else {
+            p <- p + labs(title = paste("Distribution of", input$x))
+        }
+        
+        # add styling
+        p <- p + 
+            theme_bw() +
+            theme(plot.title = element_text(size = rel(1.8), face = "bold", hjust = 0.5),
+                  axis.title = element_text(size = rel(1.5)),
+                  axis.text = element_text(size = rel(1.2)),
+                  legend.text = element_text(size = rel(1.2)))
+        
+        print(p)
+        
+    }, height=750)
+
+    
     
     # render highered raw data table
     output$table <- DT::renderDT({
-        highered_simple %>%
+        raw_df %>%
             DT::datatable(options = list(
                 scrollX = TRUE,
                 paginate = T
