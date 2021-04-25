@@ -18,6 +18,7 @@ library(parsnip)
 library(workflows)
 library(yardstick)
 library(ggplot2)
+library(forcats)
 
 # loading the higher eduaction data set
 highered_raw <- vroom("data/highered.csv", col_select = (-WTSURVY))
@@ -272,34 +273,16 @@ rm(highered_raw)
 
 ### SIMPLIFIED LINEAR REGRESSION ------------------------------------------------
 highered_simple <- highered %>% select(AGE, GENDER, RACETH, CHTOT, HRSWKGR, EMSIZE, EMSEC, OCEDRLP,
-                                      NOCPRMG, YEARS_SINCE_GRAD, ADJ_SALARY)
+                                      NOCPRMG, YEARS_SINCE_GRAD, ADJ_SALARY) %>% 
+  mutate(YEARS_SINCE_GRAD = fct_relevel(YEARS_SINCE_GRAD, c("2 years or less", "3 to 7 years", "8 to 12 years")))
 
-# split into train/test
-set.seed(123)
-highered_simple_split <- initial_split(highered_simple, prop = 0.75, strata = ADJ_SALARY)
-highered_simple_train <- training(highered_simple_split)
-highered_simple_test <- testing(highered_simple_split)
+# remove highered df from memory
+rm(highered)
 
-# create recipe
-lm_simple_recipe <- recipe(ADJ_SALARY ~., data = highered_simple) %>%
-  step_dummy(all_nominal()) %>%
-  step_zv(all_predictors())
+# read saved linear model created in model.R
+lm_simple_fit <- readRDS("lm_simple_model.rds")
 
-# specify the linear regression model
-lm_model <- linear_reg() %>%
-  set_engine("lm") %>%
-  set_mode("regression")
-
-# create workflow
-lm_simple_wflow <- workflow() %>%
-  add_model(lm_model) %>%
-  add_recipe(lm_simple_recipe)
-
-# simplified linear regression model
-lm_simple_fit <- fit(lm_simple_wflow, data = highered_simple)
-
-
-# test predictions
+# test predictions output
 # test_df <- data.frame(AGE = 33,
 #                       GENDER = "Female",
 #                       RACETH = "White",
@@ -314,8 +297,6 @@ lm_simple_fit <- fit(lm_simple_wflow, data = highered_simple)
 # 
 # paste('Based on your inputs, the predicted salary is: $', test_pred[1],' - $',test_pred[2], sep = '')
 
-# remove highered df from memory
-rm(highered)
 
 # Dataset to be explored
 raw_df <- highered_simple %>%

@@ -5,9 +5,9 @@ account: tony394
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 4009616
-bundleId: 4515383
+bundleId: 4517518
 url: https://tony394.shinyapps.io/Salary_Predictor/
-when: 1619321103.31961
-lastSyncTime: 1619321103.31962
+when: 1619379813.77762
+lastSyncTime: 1619379813.77765
 asMultiple: FALSE
 asStatic: FALSE

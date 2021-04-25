@@ -168,7 +168,7 @@ lm_fit %>% pull_workflow_fit() %>% vip()
 
 
 
-### SIMPLIFIED LINEAR REGRESSION ------------------------------------------------
+### SIMPLIFIED LINEAR REGRESSION -------------------------------------------------------------------
 # split into train/test
 set.seed(123)
 highered_simple_split <- initial_split(highered_simple, prop = 0.75, strata = ADJ_SALARY)
@@ -194,7 +194,10 @@ lm_simple_pred <- highered_simple_test %>%
   select(ADJ_SALARY) %>%
   bind_cols(predict(lm_simple_fit, highered_simple_test)) %>%
   bind_cols(predict(lm_simple_fit, highered_simple_test, type = "conf_int")) # add 95% confidence intervals
-lm_simple_pred
+
+
+# save the model
+# saveRDS(lm_simple_fit, file = "lm_simple_model.rds")
 
 
 # linear regression metrics
@@ -442,6 +445,3 @@ collect_metrics(rf_final_fit) %>%
 rf_model_fit <- fit(rf_wflow, highered_train) %>% pull_workflow_fit()
 rf_model_pred <- (predict(rf_model_fit, highered_test)) # add 95% confidence intervals
 
-
-# save simple linear model
-saveRDS(lm_simple_fit, "./lm_simple_model.rds")
