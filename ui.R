@@ -56,6 +56,11 @@ navbarPage(title = "STEM Professional Salary Predictor",
                             levels(highered_simple$EMSEC)
                             ),
                        selectInput(
+                         inputId = 'degree',
+                         label = 'Highest degree received',
+                         levels(highered_simple$DGRDG)
+                       ),
+                       selectInput(
                            inputId = 'profession',
                            label = "Type of job:",
                            levels(highered_simple$NOCPRMG)
@@ -187,13 +192,13 @@ navbarPage(title = "STEM Professional Salary Predictor",
                tags$br(),
                tags$div(
                    style = "font-size: 20px",
-                   tags$p("This Shiny application was developed to predict salaries of science and engineering professionals. According to an article on Payscale.com, it stated that in 2019, women earned 79 cents for every dollar men made. This model is intended to predict a salary range given a variety of demographic, employer and individual characteristics. The motivation for this Shiny app is to investigate what qualities of an individual have the most influence on salary in the STEM field and understand how these qualities are related."),
+                   tags$p("This Shiny application was developed to predict salaries of science and engineering professionals. According to an article on Payscale.com, it stated that in 2019, women earned 79 cents for every dollar men made. This model is intended to predict a salary range based on a 95% confidence interval given a variety of demographic, employer and individual characteristics. The motivation for this Shiny app is to investigate what qualities of an individual have the most influence on salary in the STEM field and understand how these qualities are related."),
                    tags$br(),
                    tags$p("Prediction of salaries was achieved by creating a regression model using survey data on scientists and engineers. The survey data was curated by the University of Minnesota IPUMS Higher Ed. IPUMS Higher Ed disseminates data from the Scientists and Engineers Statistical Data System (SESTAT), the leading surveys for studying the science and engineering (STEM) workforce in the United States. Data from the National Surveys of College Graduates (NSCG), Recent College Graduates (NSRCG) and Doctorate Recipients (SDR) are integrated from 1993 to the present. The IPUMS Higher ED website provides open access to the survey data up until 2013."),
                    tags$br(),
                    tags$p("In order to provide predictions of salaries adjusted for inflation and to transform older salary data to present values, Consumer Provider Index (CPI) inflation data from the U.S. Bureau of Labor Statistics' CPI Inflation Calculator was obtained. The CPI inflation calculator uses the Consumer Price Index for All Urban Consumers (CPI-U) U.S. city average series for all items, not seasonally adjusted. This data represents changes in the prices of all goods and services purchased for consumption by urban households. The salaries from the surveys were then adjusted using the CPI index as of March 2021."),
                    tags$br(),
-                   tags$p(strong("Note:"), "This prediction is currently based on a relatively simple linear regression model. Further work would be required to evaluate other machine learning models to increase salary prediction accuracy and determine reliable variable importance measures."),
+                   tags$p(strong("Note:"), "This prediction is currently based on a relatively simple linear regression model. Further work would be required to evaluate other machine learning algorithms and model selection techniques to increase salary prediction accuracy and determine reliable variable importance measures."),
                    tags$p("Also, additional adjustments will need to be incorporated in the model to account for bias in the underlying data, gender and ethnic salary disparities, and cost of living differences."),
                    tags$br(),
                    tags$br()

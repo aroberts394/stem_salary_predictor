@@ -20,12 +20,13 @@ shinyServer(function(input, output) {
         Hours <- as.character(input$workhours)
         EmpSize <- as.character(input$empsize)
         EmpSector <- as.character(input$empsec)
+        Degree <- as.character(input$degree)
         WorkRelated <- as.character(input$work_related)
         Profession <- as.character(input$profession)
         Years <- as.character(input$years)
         
         # combine inputs into table
-        input_table <- cbind.data.frame(Age, Gender, Race, Children, Hours, EmpSize, EmpSector, 
+        input_table <- cbind.data.frame(Age, Gender, Race, Children, Hours, EmpSize, EmpSector, Degree, 
                                         WorkRelated, Profession, Years)
         input_table <- as.data.frame(input_table)
        
@@ -45,6 +46,7 @@ shinyServer(function(input, output) {
                    HRSWKGR = input$workhours,
                    EMSIZE = input$empsize,
                    EMSEC = input$empsec,
+                   DGRDG = input$degree,
                    OCEDRLP = input$work_related,
                    NOCPRMG = input$profession,
                    YEARS_SINCE_GRAD = input$years
@@ -65,7 +67,7 @@ shinyServer(function(input, output) {
     
     # render predicted salary text
     output$salary <- renderText(
-        paste('Based on your inputs, the predicted salary range is: $', pred1(),' - $', pred2(), sep = '')
+        paste('Based on your inputs, on average you should expect to make between: $', pred1(),' - $', pred2(), sep = '')
         ) # end render predicted salary text
 
     # render leaflet map

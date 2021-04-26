@@ -30,8 +30,8 @@ highered <- highered %>%
   select(-YEAR,-PERSONID, -WEIGHT, -BIRYR,-SURID, -SAMPLE, -NOCPR)
 
 # check referential integrity of REFID
-length(unique(highered$REFID))
-length(highered$REFID) - length(unique(highered$REFID)) #30696 seem to be duplicated observations in some fashion
+# length(unique(highered$REFID))
+# length(highered$REFID) - length(unique(highered$REFID)) #30696 seem to be duplicated observations in some fashion
 
 # remove duplicate rows and keep first row with non-null values
 highered <- highered %>%
@@ -41,7 +41,7 @@ highered <- highered %>%
 #glimpse(highered)
 
 # check for columns for missing values
-apply(is.na(highered), 2, sum)
+# apply(is.na(highered), 2, sum)
 
 # remove missing values
 highered <- na.omit(highered)
@@ -272,8 +272,8 @@ rm(highered_raw)
 
 
 ### SIMPLIFIED LINEAR REGRESSION ------------------------------------------------
-highered_simple <- highered %>% select(AGE, GENDER, RACETH, CHTOT, HRSWKGR, EMSIZE, EMSEC, OCEDRLP,
-                                      NOCPRMG, YEARS_SINCE_GRAD, ADJ_SALARY) %>% 
+highered_simple <- highered %>% select(AGE, GENDER, RACETH, CHTOT, HRSWKGR, EMSIZE, EMSEC, DGRDG,
+                                      NOCPRMG, OCEDRLP, YEARS_SINCE_GRAD, ADJ_SALARY) %>% 
   mutate(YEARS_SINCE_GRAD = fct_relevel(YEARS_SINCE_GRAD, c("2 years or less", "3 to 7 years", "8 to 12 years")))
 
 # remove highered df from memory
@@ -307,6 +307,7 @@ raw_df <- highered_simple %>%
          Hours_working = HRSWKGR,
          Employer_size = EMSIZE,
          Employer_sector = EMSEC,
+         Type_of_Degree = DGRDG,
          Degree_related_to_job = OCEDRLP,
          Job_profession = NOCPRMG,
          Years_since_grad = YEARS_SINCE_GRAD,
