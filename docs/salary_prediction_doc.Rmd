@@ -1,0 +1,109 @@
+---
+title: "PUBH 7462 Salary Predictor Shiny App Documentation"
+author: "Tony Roberts"
+date: "`r format(Sys.time(),'%B %d, %Y')`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# App name
+
+The app name is **STEM Professional Salary Predictor**
+
+
+# App purpose
+<!-- what is the main purpose of your app? -->
+
+This Shiny application was developed to predict salaries of science and engineering professionals. According to an article on Payscale.com, it stated that in 2019, women earned 79 cents for every dollar men made. This model is intended to predict a salary range given a variety of demographic, employer and individual characteristics. The motivation for this Shiny app is to investigate what qualities of an individual have the most influence on salary in the STEM field and understand how these qualities are related.
+
+
+Prediction of salaries was achieved by creating a regression model using survey data on scientists and engineers. The survey data was curated by the University of Minnesota IPUMS Higher Ed. IPUMS Higher Ed disseminates data from the Scientists and Engineers Statistical Data System (SESTAT), the leading surveys for studying the science and engineering (STEM) workforce in the United States. Data from the National Surveys of College Graduates (NSCG), Recent College Graduates (NSRCG) and Doctorate Recipients (SDR) are integrated from 1993 to the present. The IPUMS Higher ED website provides open access to the survey data up until 2013.
+
+
+In order to provide predictions of salaries adjusted for inflation and to transform older salary data to present values, Consumer Provider Index (CPI) inflation data from the U.S. Bureau of Labor Statistics' CPI Inflation Calculator was obtained. The CPI inflation calculator uses the Consumer Price Index for All Urban Consumers (CPI-U) U.S. city average series for all items, not seasonally adjusted. This data represents changes in the prices of all goods and services purchased for consumption by urban households. The salaries from the surveys were then adjusted using the CPI index as of March 2021.
+
+
+# Availability
+<!-- Availability: How can the app be run? The preferred option is to create a publicly accessible app on shinyapps.io (Links to an external site.). If you cannot use shinyapps.io, please indicate why not and follow the instructions in Task #3 below.  -->
+
+The app has been published to the RStudio [Shinyapps.io](https://www.rstudio.com/products/shiny/shiny-server/) server. 
+
+It is publicly available and can be accessed here: [STEM Professional Salary Predictor](https://tony394.shinyapps.io/Salary_Predictor/).
+
+
+# Data Sources
+<!-- What data source(s) will you be using, if any? Are they publicly available? If not, indicate why not, and if it will be possible to make your app publicly available after the end of the class. -->
+
+The data sources that would be used for this dashboard are:
+
+- STEM Professional salaries and demographic data:
+    - [IPUMS Higher Ed Survey Data on Scientists and Engineers](https://highered.ipums.org/highered/)
+        
+- Cost of Living Index by State: 
+    - [Advisor Smith City Cost of Living Index](https://advisorsmith.com/data/coli/)
+    
+- Consumer Price Index (CPI) Inflation data:
+    - [U.S. Bureau of Labor Statistics CPI Calculator](https://www.bls.gov/data/inflation_calculator.htm)
+    
+All of these data sources are publicly available at the links above. To create customized extracts of the survey data from the IPUMS Higher Ed website, you will first need to create an account. The **Table** tab in the Shiny app has a download button where you can download the sample of the survey data used in creation the app. 
+
+
+# App Functions
+<!-- App functions: What are the main functions/actions that the app allows the user to do? Provide brief instructions for how to carry out these main functions. -->
+
+The app has four tabs that serve different functions. The four tabs are: **Prediction**, **EDA**, **Table**, and **About**. 
+
+In the **Prediction** tab, the user would be able to select and enter a variety of inputs including: age, gender, race, number of children, hours worked per week, employer size, employer sector, type of job, how related the job is to their degree, and years since graduation. They can also see their inputs on a small table on the main panel of the tab. After the user has selected their inputs, they click on the **Predict** button and a salary range prediction is generated in the form: "Based on your inputs, the predicted salary range is: \$xxxx - \$xxxx". The user can change the inputs and generate new salary predictions as many times as they like. Also, there is a choropleth map of the United States that shows the Cost of Living Index (COLI) by state. The average and median COLI is calculated and displayed as well.
+
+In the **EDA** tab, the user is able to perform some exploratory data analysis (EDA) on the underlying data used in generating the predictions. This tab was inspired by work done by Stanford Statistics PhD Student, Kenneth Tay. By default, 1000 random observations are used to make the plots. The user can input the random seed for reproducibility. The user can also control the number of observations using the slider, and choose the observations randomly or take the top $n$ data points from the dataset. The type of plot the app makes depends on the type of variables given to it. If one numeric variable and one non-numeric variable is given, the app makes a boxplot. If two numeric variables are given, it makes a scatterplot. For scatterplots, the user has the option to jitter the points and/or to add a smoothing line. If two non-numeric variables are given, the app makes a heatmap depicting how often each combination is present in the data. If the user wants a visualization for just one variable, the user can set the “Y” variable to “None”. If the “X” variable is numeric, the app plots a histogram. If the “X” variable is non-numeric, the app plots a bar plot showing counts. Finally for color, the app only allows plots to be colored by non-numeric variables.
+
+In the **Table** tab, the user can use the "Download data" button to download all the data used in creating the predictive model serving the app. Also, the user can search, filter and view the dataset in this tab.
+
+In the **About** tab, the user can read about the background and motivation for creating this app. Also, I make some notes on some cautions of using the app and improvements that can be made. 
+
+# Programming Challenges:
+<!-- What were the main programming challenges that you faced in implementing your app? -->
+
+There were several challenges that i encountered while implementing this app. The hardest challenge was memory and performance issues of the app. Using a sophisticated machine learning model such as a random forest, gradient boosting machine model within the app was causing lots of issues. At the same time as I was implementing this app, I was also learning and experimenting with the [Tidymodels](https://www.tidymodels.org) framework for machine learning and modeling. Training models on my data was taking a lot of time and computing power that was not sustainable for this project. Also, the sophisticated model objects were too large to serve the model. I ended up using a linear regression model and saving it as a .RDS file and loading it in the app. 
+
+Another issue that I had was creating an interactive leaflet map. I ran into the issue of plotting the COLI index onto the map. Launching the app was taking a long time and it would run out of memory and disconnect from the server. The COLI index data that I had did not have latitude and longitude data for the states so I had to you use the Tigris package to generate a shapefile to join the shapefile data to the COLI data by state. Initially, the COLI data had hundreds of cities and it created a large merged shape file dataframe but I had to roll it up to state level to create a smaller dataframe for the app.
+
+
+# Division of Work
+
+I was responsible for all aspects of the project.
+
+
+# Future work
+
+There are certainly several improvements that can be made to this app. For one, this prediction is currently based on a relatively simple linear regression model. Further work would be required to evaluate other machine learning models to increase salary prediction accuracy and determine reliable variable importance measures.
+
+Also, additional adjustments will need to be incorporated in the model to account for bias in the underlying data, gender and ethnic salary disparities, and cost of living differences. 
+
+Another future improvement would be in showing salary predictions by state on the map in the Predictions tab as well, but that might male the UI too overwhelming for the user.
+
+
+
+\  
+\  
+\  
+
+
+
+
+
+\  
+\  
+\  
+
+
+
